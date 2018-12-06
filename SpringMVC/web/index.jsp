@@ -8,9 +8,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
   <head>
-    <title>$Title$</title>
+    <title>12315468</title>
   </head>
   <body>
-  $END$
+  2w4f68w4f65
   </body>
 </html>
