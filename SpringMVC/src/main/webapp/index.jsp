@@ -11,5 +11,15 @@
 <body>
 <h2>Hello World!</h2>
 <p>src:http://localhost:8080/springmvc/index.jsp</p>
+<form id="reportPast" action="/springmvc/Home" method="post">
+    begin:<input type="text" name="begin"><br>
+    end:<input type="text" name="end"><br>
+    <input type="submit" value="POST查找">
+</form>
 </body>
+<script>
+    function Search(){
+        window.open("/springmvc/detail/data=" + document.getElementById("userName").value);
+    }
+</script>
 </html>

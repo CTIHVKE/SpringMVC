@@ -36,13 +36,13 @@ public class LogMapperTest {
 
     @Test
     public void test() throws  Exception{
-        //SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-        //String NowTime = df.format(new Date());
-        //UUID guid =  java.util.UUID.randomUUID();
-        //Log log = new Log(guid.toString(),NowTime,"IGDN","LOGTITLE-2018-12-16","LOGCONTENT-1234567890");
-        //int result =  mapper.insert(log);
-        //System.out.println(result);
-        //assert(result == 1);
+//        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+//        String NowTime = df.format(new Date());
+//        UUID guid =  java.util.UUID.randomUUID();
+//        Log log = new Log(guid.toString(),NowTime,"IGDN","LOGTITLE-2018-12-16","LOGCONTENT-1234567890");
+//        int result =  mapper.insert(log);
+//        System.out.println(result);
+//        assert(result == 1);
         String uuid = "079329b2-0e2e-408f-9cc7-5fda4c2188e4";
         Log log = mapper.selectByPrimaryKey(uuid);
         System.out.println(log.getLogUser() + "-" + log.getLogTime());
