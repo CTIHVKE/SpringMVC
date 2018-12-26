@@ -1,7 +1,6 @@
 package com.springmvc.entity;
 
 public class Log {
-
     private String logGuid;
 
     private String logTime;
@@ -12,12 +11,17 @@ public class Log {
 
     private String logContent;
 
-    public Log() {
+
+    public Log(String logGuid, String logTime, String logUser, String logTitle, String logContent) {
         this.logGuid = logGuid;
         this.logTime = logTime;
         this.logUser = logUser;
         this.logTitle = logTitle;
         this.logContent = logContent;
+    }
+
+    public Log() {
+
     }
 
     public void setLogGuid(String logGuid) {

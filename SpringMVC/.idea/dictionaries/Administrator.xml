@@ -2,10 +2,14 @@
   <dictionary name="Administrator">
     <words>
       <w>annotatedmapper</w>
+      <w>getstring</w>
       <w>igdn</w>
       <w>jstl</w>
       <w>maper</w>
       <w>mixedmapper</w>
+      <w>mydiv</w>
+      <w>newstr</w>
+      <w>newstring</w>
       <w>ojdbc</w>
       <w>springmvc</w>
       <w>sqlmap</w>
