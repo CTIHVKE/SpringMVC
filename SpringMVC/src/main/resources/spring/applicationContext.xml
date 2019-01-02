@@ -90,8 +90,20 @@ http://www.springframework.org/schema/beans ">
 
     <!-- 拦截器 -->
     <mvc:interceptors>
-        <!-- 国际化操作拦截器 如果采用基于（请求/Session/Cookie）则必需配置 -->
-        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
+        <mvc:interceptor>
+            <!--
+               /**的意思是所有文件夹及里面的子文件夹
+               /*是所有文件夹，不含子文件夹
+               /是web项目的根目录
+             -->
+            <mvc:mapping path="/**"/>
+            <!-- 需排除拦截的地址 -->
+            <!--<mvc:exclude-mapping path="/userController/login"/>-->
+            <bean id="Interceptor" class="com.springmvc.Filter.Interceptor" /><!--这个类就是我们自定义的Interceptor -->
+
+            <!-- 国际化操作拦截器 如果采用基于（请求/Session/Cookie）则必需配置 -->
+            <!--<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>-->
+        </mvc:interceptor>
     </mvc:interceptors>
     <!-- 定义无Controller的path<->view直接映射 -->
     <!-- <mvc:view-controller path="/" view-name="redirect:/" /> -->
