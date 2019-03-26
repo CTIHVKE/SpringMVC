@@ -7,6 +7,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 public class Interceptor extends HandlerInterceptorAdapter {
     private final Logger log = LoggerFactory.getLogger(Interceptor.class);
@@ -27,6 +28,9 @@ public class Interceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,Object handler) throws Exception{
+//        HttpSession session = request.getSession();
+//        String _csrfBySession = String.valueOf(session.getAttribute("_csrf"));
+//        session.removeAttribute("_csrf");  //使用之后从session中删掉
         if("GET".equalsIgnoreCase(request.getMethod())){
             RequestUtil.saveRequest(request);
         }
@@ -34,13 +38,15 @@ public class Interceptor extends HandlerInterceptorAdapter {
         String requestUri = request.getRequestURI();
         String contextPath = request.getContextPath();
         String url = requestUri.substring(contextPath.length());
+        //System.out.println(url + url.indexOf("/html"));
         if("/userController/login".equals(url)){
+
             return true;
         }else{
-            String username = (String)request.getSession().getAttribute("user");
+            String username = (String)request.getSession().getAttribute("ihvke");
             if(username == null){
                 log.info("Interceptor:跳转到login页面！");
-                request.getRequestDispatcher("/springmvc/login.jsp").forward(request,response);
+                request.getRequestDispatcher("/springmvc/login.html").forward(request,response);
                 return false;
             }else{
                 return true;
@@ -65,7 +71,7 @@ public class Interceptor extends HandlerInterceptorAdapter {
      * 当有拦截器抛出异常时,会从当前拦截器往回执行所有的拦截器的afterCompletion()
      */
     @Override
-    public void afterCompletion(HttpServletRequest requuest,
+    public void afterCompletion(HttpServletRequest request,
                                 HttpServletResponse response,Object handler,Exception ex)
         throws Exception{
         log.info("==============执行顺序: 3、afterCompletion================");

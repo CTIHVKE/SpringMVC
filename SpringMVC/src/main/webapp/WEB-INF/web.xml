@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
+  <description>
+    Spring MVC
+  </description>
   <display-name>SpringMVC</display-name>
   <!-- 配置编码方式-->
   <filter>
@@ -18,6 +21,54 @@
     <filter-name>encodingFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
+
+  <!--不采用spring的过滤器-->
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.css</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.gif</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.jpg</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.ico</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.js</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/log</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/getstring</url-pattern>
+  </servlet-mapping>
+  <!--不采用spring的过滤器-->
+
+  <!-- 取消对某一类文件的拦截（第二种方法）-->
+  <!--<servlet-mapping>-->
+    <!--<servlet-name>default</servlet-name>-->
+    <!--<url-pattern>*.md</url-pattern>-->
+    <!--拦截/js/路径下的所有文件，-->
+    <!--<url-pattern>/html/js/*"</url-pattern>-->
+    <!--<url-pattern>/html/css/*.css</url-pattern>-->
+    <!--<url-pattern>*.images</url-pattern>-->
+    <!--<url-pattern>*.styles</url-pattern>-->
+  <!--</servlet-mapping>-->
 
   <!--web.xml配置CommonFilter-->
   <filter>
@@ -38,6 +89,7 @@
       <param-name>contextConfigLocation</param-name>
       <param-value> classpath:spring/applicationContext.xml</param-value>
     </init-param>
+    <!--经过上面的配置，在servlet中能够调用getServletConfig().getInitParameter("param1")获得参数名对应的值-->
     <load-on-startup>1</load-on-startup>
   </servlet>
   <!-- 将前端URL请求和后台处理方法controller建立对应关系-->
@@ -52,24 +104,25 @@
       org.springframework.web.context.ContextLoaderListener
     </listener-class>
   </listener>
-  <!-- 取消对某一类文件的拦截-->
-  <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>*.md</url-pattern>
-  </servlet-mapping>
 
   <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value> classpath:spring/applicationContext.xml</param-value>
   </context-param>
+
   <!-- 欢迎页面-->
   <welcome-file-list>
-    <welcome-file>/WEB-INF/index.jsp</welcome-file>
+    <welcome-file>/index.html</welcome-file>
   </welcome-file-list>
   <!--404错误展示页面，可自行配置-->
   <error-page>
   <error-code>404</error-code>
-  <location>/WEB-INF/views/404.jsp</location>
+  <location>/WEB-INF/html/404.html</location>
+  </error-page>
+
+  <error-page>
+  <exception-type>java.lang.Exception</exception-type>
+  <location>/WEB-INF/html/exception.html</location>
   </error-page>
   <!--设置session失效时间为30分钟 -->
   <session-config>

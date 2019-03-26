@@ -11,36 +11,11 @@ public class Log {
 
     private String logContent;
 
-
     public Log(String logGuid, String logTime, String logUser, String logTitle, String logContent) {
         this.logGuid = logGuid;
         this.logTime = logTime;
         this.logUser = logUser;
         this.logTitle = logTitle;
-        this.logContent = logContent;
-    }
-
-    public Log() {
-
-    }
-
-    public void setLogGuid(String logGuid) {
-        this.logGuid = logGuid;
-    }
-
-    public void setLogTime(String logTime) {
-        this.logTime = logTime;
-    }
-
-    public void setLogUser(String logUser) {
-        this.logUser = logUser;
-    }
-
-    public void setLogTitle(String logTitle) {
-        this.logTitle = logTitle;
-    }
-
-    public void setLogContent(String logContent) {
         this.logContent = logContent;
     }
 
@@ -62,5 +37,25 @@ public class Log {
 
     public String getLogContent() {
         return logContent;
+    }
+
+    public Log() {
+
+    }
+
+    public void setLogTime(String logTime) {
+        this.logTime = logTime;
+    }
+
+    public void setLogUser(String logUser) {
+        this.logUser = logUser;
+    }
+
+    public void setLogTitle(String logTitle) {
+        this.logTitle = logTitle;
+    }
+
+    public void setLogContent(String logContent) {
+        this.logContent = logContent;
     }
 }

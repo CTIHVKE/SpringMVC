@@ -17,7 +17,7 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
-    public Log logSelective(Log log) {
+    public Log SelectByKey(Log log) {
         return mapper.selectByPrimaryKey(log.getLogGuid());
     }
 }

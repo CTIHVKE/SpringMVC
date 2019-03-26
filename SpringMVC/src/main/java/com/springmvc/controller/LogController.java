@@ -58,7 +58,7 @@ public class LogController {
     @ResponseBody
     public Map<String,String> Register(@RequestBody Log log, HttpServletRequest request) {
         System.out.println("post");
-        Log l = new LogServiceImpl().logSelective(log);
+        Log l = new LogServiceImpl().SelectByKey(log);
         request.setAttribute("Log", log);
         Map<String,String> map = new HashMap<String, String>();
 

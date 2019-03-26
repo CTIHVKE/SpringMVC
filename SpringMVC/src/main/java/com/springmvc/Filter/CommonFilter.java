@@ -24,26 +24,36 @@ public class CommonFilter extends HttpFilter {
      */
     @Override
     public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        log.info("==============拦截get请求================");
-
+        log.info("======START========拦截get请求================");
+        System.out.println("======START========拦截get请求================");
         if("GET".equalsIgnoreCase(request.getMethod())){
             RequestUtil.saveRequest(request);
         }
         String requestUri = request.getRequestURI();
         String contextPath = request.getContextPath();
         String url = requestUri.substring(contextPath.length());
-        if("/login".equals(url)){
+        System.out.println("url:" + url);
+        if("/login".equals(url) || url.indexOf("/js") != -1
+                || url.indexOf("/css") != -1 || url.indexOf("/images") != -1
+                || url.indexOf("/doLogin") != -1 || url.indexOf("/doRegister") != -1
+        ){
             filterChain.doFilter(request,response);
-            return;
+            System.out.println("ok:不处理拦截");
         }
         else {
-            String username = (String) request.getSession().getAttribute("user");
+            System.out.println("ok:做处理拦截");
+            String username = (String) request.getSession().getAttribute("ihvke");
             if(username == null){
                 log.info("被拦截：跳转到login页面！");
-                request.getRequestDispatcher("/springmvc/login.jsp").forward(request,response);
+//                System.out.println("被拦截：跳转到login页面！");
+                request.getRequestDispatcher("/WEB-INF/html/login.html").forward(request,response);
             }else {
+                if("/".equals(url)){
+                    request.getRequestDispatcher("/WEB-INF/html/Home.html").forward(request,response);
+                }
                 filterChain.doFilter(request,response);
             }
         }
+        System.out.println("======END========拦截get请求================");
     }
 }
