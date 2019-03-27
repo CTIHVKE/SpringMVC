@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>登录</title>
+    <link rel="icon" href="images/ico16x16.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="images/ico16x16.ico" type="image/x-icon"/>
+    <link rel="bookmark" href="images/ico16x16.ico" type="image/x-icon"/>
+
+    <script type="text/javascript" src="js/jquery-2.2.3.js"></script>
+    <script type="text/javascript" src="js/angular-1.7.8/angular.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/html/login.css"/>
+</head>
+
+<body>
+<div ng-app="myApp" ng-controller="myController">
+    登录名：
+    <input type="text" ng-model="userinfo.loginname"></input>
+    密码：
+    <input type="password" ng-model="userinfo.password"></input>
+    <button ng-click='f_Save()'>保存</button>
+</div>
+
+<script>
+    var app = angular.module('myApp', []);
+    app.controller('myController', function ($scope) {
+        $scope.userinfo = {loginname:"admin",password:"1"};
+        $scope.f_Save = function () {
+
+            var url="/springmvc/doLogin";
+            // $.post(
+            //     url,
+            //     {
+            //         user:JSON.stringify($scope.userinfo)  //将js对象转成json对象
+            //     },
+            //     function(data){
+            //         var d = JSON.parse(data);
+            //         alert("成功！");
+            //     },
+            //     "application/json;charset=UTF-8" //指定消息请求类型
+            // );
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                url: url,
+                contentType: "application/json;charset=UTF-8",//指定消息请求类型
+                data: JSON.stringify($scope.userinfo),//将js对象转成json对象
+                success: function (data) {
+                    if (data.error == 0) {
+                        alert("666");
+                    } else {
+                        alert(data.error + " " + data.msg);
+                    }
+                },
+                error:function(XMLHttpRequest, textStatus, errorThrown){
+                    alert("error");
+                }
+            });
+        };
+    });
+
+</script>
+</body>
+</html>

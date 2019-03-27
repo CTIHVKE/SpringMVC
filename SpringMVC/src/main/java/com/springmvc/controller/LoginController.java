@@ -28,8 +28,8 @@ public class LoginController {
 
     private final Logger log = LoggerFactory.getLogger(CommonFilter.class);
     @Autowired
-    @Qualifier("userService")
-    private UserService userService;
+    @Qualifier("userServiceImpl")
+    private UserServiceImpl userService;
 //    @RequestMapping(value = "/Home",method = RequestMethod.GET)
 //    public ModelAndView toHome() {
 //        log.info("执行了Hello方法！");
@@ -54,12 +54,12 @@ public class LoginController {
 //            System.out.println(DigestUtils.md5Hex("xtesefcu2"));
 //            System.out.println(DigestUtils.md5Hex("ihvke"));
             System.out.println(user.getPassword());
-            userService = new UserServiceImpl();
+//            userService = new UserServiceImpl();
             String password = DigestUtils.md5Hex(user.getPassword());
             System.out.println("password:" + password);
             System.out.println("redirect:" + RequestUtil.retrieveSavedRequest(request));
 //            SysUser userEntity = userService.SelectByLoginName(user);
-            user.setUserid(2);
+            user.setUserid(Short.parseShort("2"));
             System.out.println(user.getUserid() + "--id");
             SysUser userEntity = userService.SelectByKey(user);
             if (userEntity != null) {
@@ -97,7 +97,7 @@ public class LoginController {
         log.info("执行了register方法！");
         System.out.println("执行了register方法！");
         try {
-            userService = new UserServiceImpl();
+//            userService = new UserServiceImpl();
             String password = DigestUtils.md5Hex(user.getPassword());
             System.out.println("redirect:" + RequestUtil.retrieveSavedRequest(request));
             SysUser userEntity = userService.SelectByLoginName(user);

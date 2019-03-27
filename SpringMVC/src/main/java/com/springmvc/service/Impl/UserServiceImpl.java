@@ -32,7 +32,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public SysUser SelectByLoginName(SysUser user) {
         System.out.println(user.getLoginname() + "--Service");
-        return mapper.selectByLoginName(user.getLoginname());
+//        return mapper.selectByLoginName(user.getLoginname());
+        return mapper.selectByPrimaryKey(user.getUserid());
     }
 
     @Override
