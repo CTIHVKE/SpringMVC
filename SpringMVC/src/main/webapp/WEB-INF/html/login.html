@@ -44,16 +44,16 @@
                 dataType: "json",
                 url: url,
                 contentType: "application/json;charset=UTF-8",//指定消息请求类型
-                data: JSON.stringify($scope.userinfo),//将js对象转成json对象
+                data: JSON.stringify({"userinfo": $scope.userinfo}),//将js对象转成json对象
                 success: function (data) {
                     if (data.error == 0) {
-                        alert("666");
+                        alert(data.loginname);
                     } else {
                         alert(data.error + " " + data.msg);
                     }
                 },
-                error:function(XMLHttpRequest, textStatus, errorThrown){
-                    alert("error");
+                error:function(error){
+                    alert(error.msg);
                 }
             });
         };

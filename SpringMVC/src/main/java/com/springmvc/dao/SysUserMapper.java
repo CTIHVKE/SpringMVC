@@ -42,6 +42,17 @@ public interface SysUserMapper {
     @ResultMap("BaseResultMap")
     SysUser selectByPrimaryKey(Short userid);
 
+
+    @Select({
+            "select",
+            "USERID, USERGUID, USERNAME, LOGINNAME, PASSWORD, LASTTIME, RECORDSTATUS, CREATEUSERID, ",
+            "CREATEDATE, MODIFYUSERID, MODIFYDATE",
+            "from SYS_USER",
+            "where LOGINNAME = #{loginname,jdbcType=VARCHAR}"
+    })
+    @ResultMap("BaseResultMap")
+    SysUser selectByLoginname(String loginname);
+
     int updateByPrimaryKeySelective(SysUser record);
 
     @Update({

@@ -1,6 +1,8 @@
 package com.springmvc.dao;
 
-import com.springmvc.entity.Log;
+import com.springmvc.entity.SysUser;
+import com.springmvc.service.Impl.SysUserServiceImpl;
+import com.springmvc.service.SysUserService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,12 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.List;
+
 public class LogMapperTest {
 
     private ApplicationContext applicationContext;
-
-    @Autowired
-    private LogMapper mapper;
 
     @Before
     public void setUp() throws Exception {
@@ -21,7 +22,7 @@ public class LogMapperTest {
         applicationContext = new
                 ClassPathXmlApplicationContext("classpath:spring/applicationContext.xml");
         //导入要测试的
-        mapper = applicationContext.getBean(LogMapper.class);
+//        userService = applicationContext.getBean(SysUserServiceImpl.class);
     }
 
     @After
@@ -38,7 +39,16 @@ public class LogMapperTest {
 //        System.out.println(result);
 //        assert(result == 1);
         String uuid = "079329b2-0e2e-408f-9cc7-5fda4c2188e4";
-        Log log = mapper.selectByPrimaryKey(uuid);
-        System.out.println(log.getLogUser() + "-" + log.getLogTime());
+//        Log log = mapper.selectByPrimaryKey(uuid);
+//        System.out.println(log.getLogUser() + "-" + log.getLogTime());
+
+        SysUserMapper mapper = applicationContext.getBean(SysUserMapper.class);
+        SysUser user = mapper.selectByPrimaryKey(Short.parseShort("2"));
+        System.out.println(user.getLoginname());
+
+        SysUserService sysUserService = applicationContext.getBean(SysUserService.class);
+        List<SysUser> list = sysUserService.getUserList();
+        System.out.println(list.get(0).getLoginname()+"--test");
+        list.forEach(e->System.out.println(e.getLoginname()+"test3"));
     }
 }
