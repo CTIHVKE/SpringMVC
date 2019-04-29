@@ -28,6 +28,21 @@
   </properties>
 
   <dependencies>
+    <!-- 配置 redis  start-->
+    <!-- 集成Redis -->
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-redis</artifactId>
+      <version>1.7.5.RELEASE</version>
+    </dependency>
+    <!-- Redis客户端 -->
+    <dependency>
+      <groupId>redis.clients</groupId>
+      <artifactId>jedis</artifactId>
+      <version>2.9.0</version>
+    </dependency>
+    <!-- 配置 redis  end-->
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

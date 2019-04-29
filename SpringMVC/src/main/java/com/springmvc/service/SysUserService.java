@@ -9,4 +9,6 @@ public interface SysUserService {
     List<SysUser> getUserList();
 
     SysUser selectByLoginname(String loginname);
+
+    SysUser selectByPrimaryKey(Short key);
 }
