@@ -40,6 +40,8 @@ public class SysUser {
         this.modifydate = modifydate;
     }
 
+    public SysUser(){}
+
     public Short getUserid() {
         return userid;
     }

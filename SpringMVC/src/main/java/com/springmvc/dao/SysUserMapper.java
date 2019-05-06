@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 public interface SysUserMapper {
     @Delete({
         "delete from SYS_USER",
@@ -42,6 +44,15 @@ public interface SysUserMapper {
     @ResultMap("BaseResultMap")
     SysUser selectByPrimaryKey(Short userid);
 
+    @Select({
+            "select",
+            "USERID, USERGUID, USERNAME, LOGINNAME, PASSWORD, LASTTIME, RECORDSTATUS, CREATEUSERID, ",
+            "CREATEDATE, MODIFYUSERID, MODIFYDATE",
+            "from SYS_USER",
+            "where RECORDSTATUS != 'INACTIVE'"
+    })
+    @ResultMap("BaseResultMap")
+    List<SysUser> selectAll();
 
     @Select({
             "select",

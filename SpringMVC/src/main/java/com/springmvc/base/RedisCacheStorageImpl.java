@@ -6,6 +6,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -276,4 +277,121 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
         }
         return result;
     }
+
+    /**
+     * 设置列表类型数据到redis 数据库
+     *
+     * @param cacheKey 可以看做一张表
+     * @param value
+     * @return
+     */
+    @SuppressWarnings("finally")
+    @Override
+    public boolean lpush(String cacheKey, V value) {
+        Jedis jedis =null;
+        //将key 和value  转换成 json 对象
+        String jCacheKey =JSON.toJSONString(cacheKey);
+        String jValue =JSON.toJSONString(value);
+        //操作是否成功
+        boolean isSucess =true;
+        if(StringUtils.isEmpty(jCacheKey)){
+            System.out.println("cacheKey 为空");
+            return false;
+        }
+        try {
+            jedis =redisClient.getResource();
+            //执行插入列表
+            jedis.lpush(jCacheKey, jValue);
+        } catch (JedisException e) {
+            System.out.println("连接客户端失败！");
+            isSucess =false;
+            if(null !=jedis){
+                //释放jedis 对象
+                //redisClient.brokenResource(jedis);
+                redisClient.close(jedis);
+            }
+            return false;
+        }finally{
+            if (isSucess) {
+                //返还连接池
+                //redisClient.returnResource(jedis);
+                redisClient.close(jedis);
+            }
+            return true;
+        }
+    }
+
+    /**
+     * 获取列表数据类型的值
+     *
+     * @param cacheKey
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Long llen(String cacheKey) {
+        Jedis jedis =null;
+        //将key 和value  转换成 json 对象
+        String jCacheKey =JSON.toJSONString(cacheKey);
+        Long len = null;
+        if(StringUtils.isEmpty(jCacheKey)){
+            System.out.println("cacheKey 为空！");
+            return null;
+        }
+        try {
+            //获取客户端对象
+            jedis =redisClient.getResource();
+            //执行查询
+            len =  jedis.llen(jCacheKey);
+            //返还连接池
+            //redisClient.returnResource(jedis);
+            redisClient.close(jedis);
+        } catch (JedisException e) {
+            System.out.println("连接客户端失败！");
+            if(null !=jedis){
+                //释放jedis 对象
+                //redisClient.brokenResource(jedis);
+                redisClient.close(jedis);
+            }
+        }
+        return len;
+    }
+
+    /**
+     * 获取列表类型的数据
+     *
+     * @param cacheKey
+     * @return
+     */
+    @Override
+    public List<String> lget(String cacheKey,int start,int end) {
+        Jedis jedis =null;
+        //将key 和value  转换成 json 对象
+        String jCacheKey =JSON.toJSONString(cacheKey);
+        List<String> result = null;
+        if(StringUtils.isEmpty(jCacheKey)){
+            System.out.println("cacheKey 为空！");
+            return null;
+        }
+        try {
+            //获取客户端对象
+            jedis =redisClient.getResource();
+            //执行查询
+            result =  jedis.lrange(cacheKey,start,end);
+            System.out.println(cacheKey + "lget-result-len:" + result.size());
+            //返还连接池
+            //redisClient.returnResource(jedis);
+            redisClient.close(jedis);
+        } catch (JedisException e) {
+            System.out.println("连接客户端失败！");
+            if(null !=jedis){
+                //释放jedis 对象
+                //redisClient.brokenResource(jedis);
+                redisClient.close(jedis);
+            }
+        }
+        return result;
+    }
+
+
 }

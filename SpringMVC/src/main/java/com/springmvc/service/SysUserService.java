@@ -8,6 +8,8 @@ public interface SysUserService {
 
     List<SysUser> getUserList();
 
+    void setUserList();
+
     SysUser selectByLoginname(String loginname);
 
     SysUser selectByPrimaryKey(Short key);

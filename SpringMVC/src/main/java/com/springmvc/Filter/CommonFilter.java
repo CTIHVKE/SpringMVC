@@ -36,6 +36,7 @@ public class CommonFilter extends HttpFilter {
         if("/login".equals(url) || url.indexOf("/js") != -1
                 || url.indexOf("/css") != -1 || url.indexOf("/images") != -1
                 || url.indexOf("/doLogin") != -1 || url.indexOf("/doRegister") != -1
+                || true
         ){
             filterChain.doFilter(request,response);
             System.out.println("ok:不处理拦截");

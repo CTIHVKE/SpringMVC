@@ -109,4 +109,19 @@ public class SysUserController {
             }
         }
     }
+
+    @RequestMapping(value = "/setUserList",method = RequestMethod.GET)
+    @ResponseBody
+    public void setUserList(){
+        System.out.println("控制器：setUserList");
+         service.setUserList();
+    }
+
+    @RequestMapping(value = "/getUserList",method = RequestMethod.GET)
+    @ResponseBody
+    public String getUserList(){
+        System.out.println("控制器：getUserList");
+        List<SysUser> _userlist = service.getUserList();
+        return JSON.toJSONString(_userlist);
+    }
 }
