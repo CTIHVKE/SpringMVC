@@ -1,6 +1,7 @@
 package com.springmvc.service.Impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.springmvc.base.RedisCacheStorageImpl;
 import com.springmvc.base.RedisClient;
 import com.springmvc.base.RedisKeyEnum;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.JedisPool;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,7 +26,7 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public List<SysUser> getUserList() {
-        List<SysUser> list = new ArrayList<SysUser>();
+        List<SysUser> list1 = new ArrayList<SysUser>();
 
         RedisClient redisClient = new RedisClient();
         JedisPool pool = new JedisPool();
@@ -36,20 +38,42 @@ public class SysUserServiceImpl implements SysUserService {
         System.out.println(RedisKeyEnum.SysUserList + ": Redis:len = " + len);
         if(len > 0){
             List<String> lists = redis.lget(RedisKeyEnum.SysUserList,0,10);
-            System.out.println("lists-len:" + lists.size());
-            lists.forEach(userStr -> {
-                System.out.println("user:" + JSON.toJSON(userStr));
-
-                list.add((SysUser)JSON.toJSON(userStr));
-            });
+            System.out.println(new Date().getTime() + "--Lists-len:" + lists.size());
+            for(int i = 0;i< lists.size();i++){
+                System.out.println("2019-user:" + JSON.toJSON(lists.get(i)));
+                String userString = "{\"id\":1,\"name\",\"lz\"}";
+                System.out.println(userString);
+                JSONObject userJson = JSONObject.parseObject(userString);
+                User user = JSON.toJavaObject(userJson,User.class);
+//                JSONObject userJson = JSONObject.parseObject(userStr);
+//                System.out.println(userJson.toJSONString());
+//                SysUser user = JSON.toJavaObject(userJson,SysUser.class);
+                System.out.println("999user:" + JSON.toJSONString(user));
+//                list1.add(user);
+            }
+//            lists.forEach(userStr -> {
+//                System.out.println("2019-user:" + JSON.toJSON(userStr));
+//                String userString = "{\"id\":1,\"name\",\"lz\"}";
+//                System.out.println(userString);
+//                JSONObject userJson = JSONObject.parseObject(userString);
+//                User user = JSON.toJavaObject(userJson,User.class);
+//                JSONObject userJson = JSONObject.parseObject(userStr);
+//                System.out.println(userJson.toJSONString());
+//                SysUser user = JSON.toJavaObject(userJson,SysUser.class);
+//                System.out.println("999user:" + JSON.toJSONString(user));
+//                list1.add(user);
+//            });
         }else {
             SysUser user = mapper.selectByPrimaryKey(Short.parseShort("2"));
-            list.add(user);
+            list1.add(user);
             System.out.println(user.getLoginname() + "--service");
         }
-        return list;
+        return list1;
     }
-
+    public class User{
+        private int id;
+        private String name;
+    }
     @Override
     public void setUserList() {
         RedisClient redisClient = new RedisClient();
@@ -93,10 +117,10 @@ public class SysUserServiceImpl implements SysUserService {
         redis.setRedisClient(redisClient);
         System.out.println("setUserList:" + RedisKeyEnum.Hash);
         SysUser user = mapper.selectByLoginname("ihvke");
-        System.out.println("list:" + JSON.toJSONString(user));
+        System.out.println("user:" + JSON.toJSONString(user));
         String userid = redis.hget(RedisKeyEnum.Hash,"FieldUserid");
         String username = redis.hget(RedisKeyEnum.Hash,"FieldUsername");
-        return String.format("userid:{0}--username:{1}",userid,username);
+        return String.format("userid:%s--username:%s",userid,username);
     }
 
     @Override

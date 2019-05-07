@@ -134,8 +134,8 @@ public class SysUserController {
 
     @RequestMapping(value = "/getUserHash",method = RequestMethod.GET)
     @ResponseBody
-    public void getUserHash(){
+    public String getUserHash(){
         System.out.println("控制器：getUserHash");
-        service.setUserHash();
+        return service.getUserHash();
     }
 }
