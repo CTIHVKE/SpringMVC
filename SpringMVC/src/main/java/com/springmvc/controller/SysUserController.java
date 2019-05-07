@@ -125,7 +125,7 @@ public class SysUserController {
         return JSON.toJSONString(_userlist);
     }
 
-    @RequestMapping(value = "/setUserList",method = RequestMethod.GET)
+    @RequestMapping(value = "/setUserHash",method = RequestMethod.GET)
     @ResponseBody
     public void setUserHash(){
         System.out.println("控制器：setUserHash");
