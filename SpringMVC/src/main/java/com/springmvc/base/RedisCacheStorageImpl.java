@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * redis 缓存存储器实现
  * */
-public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
+public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum, String, V> {
 
     /**
      * redis 客户端
@@ -29,7 +29,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
     }
 
     @Override
-    public boolean set(String key, V value) {
+    public boolean set(RedisKeyEnum key, V value) {
         //设置默认过时时间
         return set(key,value,EXPRIE_TIME);
     }
@@ -41,7 +41,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
      */
     @SuppressWarnings("finally")
     @Override
-    public boolean set(String key, V value, int exp) {
+    public boolean set(RedisKeyEnum key, V value, int exp) {
         Jedis jedis = null;
         //将key 和 value 转换成Json 对象
         String jKey = JSON.toJSONString(key);
@@ -78,7 +78,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public V get(String key) {
+    public V get(RedisKeyEnum key) {
         Jedis jedis = null;
         //转换成json 对象
         String jKey = JSON.toJSONString(key);
@@ -117,7 +117,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
      * */
     @SuppressWarnings("finally")
     @Override
-    public boolean remove(String key) {
+    public boolean remove(RedisKeyEnum key) {
         Jedis jedis = null;
         String jKey = JSON.toJSONString(key);
 
@@ -159,7 +159,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
      */
     @SuppressWarnings("finally")
     @Override
-    public boolean hset(String cacheKey, String key, V value) {
+    public boolean hset(RedisKeyEnum cacheKey, String key, V value) {
         Jedis jedis =null;
         //将key 和value  转换成 json 对象
         String jKey =JSON.toJSONString(key);
@@ -203,7 +203,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public V hget(String cacheKey, String key) {
+    public V hget(RedisKeyEnum cacheKey, String key) {
         Jedis jedis =null;
         //将key 和value  转换成 json 对象
         String jKey =JSON.toJSONString(key);
@@ -245,7 +245,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
      * @return
      */
     @Override
-    public Map<String, V> hget(String cacheKey) {
+    public Map<String, V> hget(RedisKeyEnum cacheKey) {
         String jCacheKey = JSON.toJSONString(cacheKey);
         //非空校验
         if(StringUtils.isEmpty(jCacheKey)){
@@ -262,7 +262,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
             if(null !=map){
                 for(Map.Entry<String, String> entry : map.entrySet()){
                     if(result ==null){
-                        result =new HashMap<String,V>();
+                        result =new HashMap<String, V>();
                     }
                     result.put((String) JSON.toJSONString(entry.getKey()), (V)JSON.toJSONString(entry.getValue()));
                 }
@@ -287,7 +287,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
      */
     @SuppressWarnings("finally")
     @Override
-    public boolean lpush(String cacheKey, V value) {
+    public boolean lpush(RedisKeyEnum cacheKey, V value) {
         Jedis jedis =null;
         //将key 和value  转换成 json 对象
         String jCacheKey =JSON.toJSONString(cacheKey);
@@ -329,7 +329,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Long llen(String cacheKey) {
+    public Long llen(RedisKeyEnum cacheKey) {
         Jedis jedis =null;
         //将key 和value  转换成 json 对象
         String jCacheKey =JSON.toJSONString(cacheKey);
@@ -342,7 +342,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
             //获取客户端对象
             jedis =redisClient.getResource();
             //执行查询
-            len =  jedis.llen(jCacheKey);
+            len =  jedis.llen(cacheKey.toString());
             //返还连接池
             //redisClient.returnResource(jedis);
             redisClient.close(jedis);
@@ -364,7 +364,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
      * @return
      */
     @Override
-    public List<String> lget(String cacheKey,int start,int end) {
+    public List<String> lget(RedisKeyEnum cacheKey,int start,int end) {
         Jedis jedis =null;
         //将key 和value  转换成 json 对象
         String jCacheKey =JSON.toJSONString(cacheKey);
@@ -377,7 +377,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<String, V> {
             //获取客户端对象
             jedis =redisClient.getResource();
             //执行查询
-            result =  jedis.lrange(cacheKey,start,end);
+            result =  jedis.lrange(cacheKey.toString(),start,end);
             System.out.println(cacheKey + "lget-result-len:" + result.size());
             //返还连接池
             //redisClient.returnResource(jedis);

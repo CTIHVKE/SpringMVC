@@ -124,4 +124,18 @@ public class SysUserController {
         List<SysUser> _userlist = service.getUserList();
         return JSON.toJSONString(_userlist);
     }
+
+    @RequestMapping(value = "/setUserList",method = RequestMethod.GET)
+    @ResponseBody
+    public void setUserHash(){
+        System.out.println("控制器：setUserHash");
+        service.setUserHash();
+    }
+
+    @RequestMapping(value = "/getUserHash",method = RequestMethod.GET)
+    @ResponseBody
+    public void getUserHash(){
+        System.out.println("控制器：getUserHash");
+        service.setUserHash();
+    }
 }
