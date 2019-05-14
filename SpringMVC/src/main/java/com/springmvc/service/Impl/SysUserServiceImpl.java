@@ -2,7 +2,8 @@ package com.springmvc.service.Impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.springmvc.base.RedisCacheStorageImpl;
+import com.springmvc.base.Impl.RedisCacheStorageImpl;
+import com.springmvc.base.Impl.RedisClientImpl;
 import com.springmvc.base.RedisClient;
 import com.springmvc.base.RedisKeyEnum;
 import com.springmvc.dao.SysUserMapper;
@@ -24,32 +25,39 @@ public class SysUserServiceImpl implements SysUserService {
     @Qualifier("sysUserMapper")
     private SysUserMapper mapper;
 
+
     @Override
     public List<SysUser> getUserList() {
         List<SysUser> list1 = new ArrayList<SysUser>();
 
-        RedisClient redisClient = new RedisClient();
-        JedisPool pool = new JedisPool();
-        redisClient.setPool(pool);
-        RedisCacheStorageImpl<String> redis = new RedisCacheStorageImpl<String>();
+        RedisClient redisClient = new RedisClientImpl();
+        JedisPool jedisPool = new JedisPool();
+        redisClient.setPool(jedisPool);
+        RedisCacheStorageImpl redis = new RedisCacheStorageImpl();
         redis.setRedisClient(redisClient);
-        System.out.println("getUserList:" + RedisKeyEnum.SysUserList);
-        Long len = redis.llen(RedisKeyEnum.SysUserList);
-        System.out.println(RedisKeyEnum.SysUserList + ": Redis:len = " + len);
+        //key
+        byte[] bytes = RedisKeyEnum.SysUserList.toString().getBytes();
+        String strKey = new String(bytes);
+//        String encoded = Base64.getEncoder().encodeToString(bytes);
+        System.out.println("1：getUserList:" + strKey);
+        Long len = redis.llen(bytes);
+        System.out.println("2:" + RedisKeyEnum.SysUserList + ": Redis:len = " + len);
         if(len > 0){
-            List<String> lists = redis.lget(RedisKeyEnum.SysUserList,0,10);
-            System.out.println(new Date().getTime() + "--Lists-len:" + lists.size());
+            List<byte[]> lists = redis.lget(bytes,0,10);
+            System.out.println("3:" + new Date().toString() + "--Lists-len:" + lists.size());
             for(int i = 0;i< lists.size();i++){
-                System.out.println("2019-user:" + JSON.toJSON(lists.get(i)));
-                String userString = "{\"id\":1,\"name\",\"lz\"}";
-                System.out.println(userString);
-                JSONObject userJson = JSONObject.parseObject(userString);
-                User user = JSON.toJavaObject(userJson,User.class);
-//                JSONObject userJson = JSONObject.parseObject(userStr);
+                String list = new String(lists.get(i));
+//                String listEncoded = Base64.getEncoder().encodeToString(lists.get(i));
+                System.out.println("4:2019-user-json:" + JSONObject.toJSON(list));
+                System.out.println("5:2019-user-list:\"" + list + "\"");
+//                System.out.println("Base64--2019-user:" + JSONObject.toJSON(listEncoded));
+//                JSONObject userJson = JSONObject.parseObject(userString);
+//                JSONObject userJson = JSONObject.parseObject(lists.get(i));
 //                System.out.println(userJson.toJSONString());
-//                SysUser user = JSON.toJavaObject(userJson,SysUser.class);
-                System.out.println("999user:" + JSON.toJSONString(user));
-//                list1.add(user);
+                SysUser user = JSONObject.parseObject(list,SysUser.class);
+//                SysUser user = JSON.parseObject(list,SysUser.class);
+                System.out.println("6:" + user.getLoginname());
+                list1.add(user);
             }
 //            lists.forEach(userStr -> {
 //                System.out.println("2019-user:" + JSON.toJSON(userStr));
@@ -66,28 +74,30 @@ public class SysUserServiceImpl implements SysUserService {
         }else {
             SysUser user = mapper.selectByPrimaryKey(Short.parseShort("2"));
             list1.add(user);
-            System.out.println(user.getLoginname() + "--service");
+            System.out.println("5:" + user.getLoginname() + "--service");
         }
         return list1;
     }
-    public class User{
-        private int id;
-        private String name;
-    }
+
     @Override
     public void setUserList() {
-        RedisClient redisClient = new RedisClient();
-        JedisPool pool = new JedisPool();
-        redisClient.setPool(pool);
-        RedisCacheStorageImpl<String> redis = new RedisCacheStorageImpl<String>();
+        RedisClient redisClient = new RedisClientImpl();
+        JedisPool jedisPool = new JedisPool();
+        redisClient.setPool(jedisPool);
+        RedisCacheStorageImpl redis = new RedisCacheStorageImpl();
         redis.setRedisClient(redisClient);
+        //key
+        byte[] bytes = RedisKeyEnum.SysUserList.toString().getBytes();
+        redis.remove(bytes);
         System.out.println("setUserList:" + RedisKeyEnum.SysUserList);
         List<SysUser> list = new ArrayList<SysUser>();
         list = mapper.selectAll();
         System.out.println("list-size:" + list.size());
         list.forEach(user ->{
-            System.out.println("list:" + JSON.toJSONString(user));
-            redis.lpush(RedisKeyEnum.SysUserList, JSON.toJSONString(user));
+//            System.out.println("list:" + JSONObject.toJSON(user));
+//            JSON.toJSONString（用这种方式转，会产生转义符，导至后面把序列化失败）
+//            System.out.println("list:" + JSONObject.toJSON(user).toString()); //JSON.toJSONString
+            redis.lpush(bytes, JSONObject.toJSON(user).toString().getBytes());
         });
 //        for (SysUser user: list) {
 //            redis.lpush(ListKey, JSON.toJSONString(user));
@@ -96,44 +106,46 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public void setUserHash(){
-        RedisClient redisClient = new RedisClient();
-        JedisPool pool = new JedisPool();
-        redisClient.setPool(pool);
-        RedisCacheStorageImpl<String> redis = new RedisCacheStorageImpl<String>();
+        RedisClient redisClient = new RedisClientImpl();
+        RedisCacheStorageImpl redis = new RedisCacheStorageImpl();
         redis.setRedisClient(redisClient);
         System.out.println("setUserList:" + RedisKeyEnum.Hash);
         SysUser user = mapper.selectByLoginname("ihvke");
         System.out.println("list:" + JSON.toJSONString(user));
-        redis.hset(RedisKeyEnum.Hash,"FieldUserid", JSON.toJSONString(user.getUserid()));
-        redis.hset(RedisKeyEnum.Hash,"FieldUsername", JSON.toJSONString(user.getUsername()));
+        //key
+        byte[] bytes = RedisKeyEnum.Hash.toString().getBytes();
+        redis.hset(bytes,"FieldUserid".getBytes(), JSON.toJSONString(user.getUserid()).getBytes());
+        redis.hset(bytes,"FieldUsername".getBytes(), JSON.toJSONString(user.getUsername()).getBytes());
     }
 
     @Override
     public String getUserHash(){
-        RedisClient redisClient = new RedisClient();
-        JedisPool pool = new JedisPool();
-        redisClient.setPool(pool);
-        RedisCacheStorageImpl<String> redis = new RedisCacheStorageImpl<String>();
+        RedisClient redisClient = new RedisClientImpl();
+        RedisCacheStorageImpl redis = new RedisCacheStorageImpl();
         redis.setRedisClient(redisClient);
         System.out.println("setUserList:" + RedisKeyEnum.Hash);
         SysUser user = mapper.selectByLoginname("ihvke");
         System.out.println("user:" + JSON.toJSONString(user));
-        String userid = redis.hget(RedisKeyEnum.Hash,"FieldUserid");
-        String username = redis.hget(RedisKeyEnum.Hash,"FieldUsername");
+        //key
+        byte[] bytes = RedisKeyEnum.Hash.toString().getBytes();
+        byte[] userid = redis.hget(bytes,"FieldUserid".getBytes());
+        byte[] username = redis.hget(bytes,"FieldUsername".getBytes());
         return String.format("userid:%s--username:%s",userid,username);
     }
 
     @Override
     public SysUser selectByLoginname(String loginname) {
 
-        RedisClient redisClient = new RedisClient();
-        JedisPool pool = new JedisPool();
-        redisClient.setPool(pool);
-        RedisCacheStorageImpl<String> redis = new RedisCacheStorageImpl<String>();
+        RedisClient redisClient = new RedisClientImpl();
+        RedisCacheStorageImpl redis = new RedisCacheStorageImpl();
         redis.setRedisClient(redisClient);
-        redis.set(RedisKeyEnum.SysUserList,"啦啦啦redis成功使用："  +  loginname);
+        //key
+        byte[] bytes = RedisKeyEnum.SysUserList.toString().getBytes();
+        redis.set(bytes,("啦啦啦redis成功使用："  +  loginname).getBytes());
 
-        String redislist = redis.get(RedisKeyEnum.LoginName);
+        //key
+        byte[] bytes_loginname = RedisKeyEnum.LoginName.toString().getBytes();
+        byte[] redislist = redis.get(bytes_loginname);
         System.out.println("redislist:" + redislist);
 
         return mapper.selectByLoginname(loginname);

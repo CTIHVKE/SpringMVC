@@ -1,23 +1,24 @@
-package com.springmvc.base;
+package com.springmvc.base.Impl;
 
-import com.alibaba.fastjson.JSON;
+import com.springmvc.base.RedisCacheStorage;
+import com.springmvc.base.RedisClient;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * redis 缓存存储器实现
  * */
-public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum, String, V> {
+public class RedisCacheStorageImpl implements RedisCacheStorage<byte[], byte[], byte[]> {
 
     /**
      * redis 客户端
      * */
     private RedisClient redisClient;
+    Jedis jedis = null;
 
     /**
      * 默认过时时间
@@ -29,7 +30,7 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
     }
 
     @Override
-    public boolean set(RedisKeyEnum key, V value) {
+    public boolean set(byte[] key, byte[] value) {
         //设置默认过时时间
         return set(key,value,EXPRIE_TIME);
     }
@@ -41,14 +42,10 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
      */
     @SuppressWarnings("finally")
     @Override
-    public boolean set(RedisKeyEnum key, V value, int exp) {
-        Jedis jedis = null;
-        //将key 和 value 转换成Json 对象
-        String jKey = JSON.toJSONString(key);
-        String jValue = JSON.toJSONString(value);
+    public boolean set(byte[] key, byte[] value, int exp) {
         //操作是否成功
         boolean isSucess = true;
-        if(StringUtils.isEmpty(jKey)){
+        if(key.length <= 0){
             System.out.println("key is empty!");
             return false;
         }
@@ -56,21 +53,19 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
             //获取客户端对象
             jedis = redisClient.getResource();
             //执行插入
-            jedis.setex(jKey,exp,jValue);
+            jedis.setex(key,exp,value);
         }catch (JedisException e){
             System.out.println("客户端连接失败！");
             isSucess = false;
             if(null != jedis){
                 //释放jedis对象
-                //redisClient.brokenResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
             return false;
         }finally {
             if(isSucess){
                 //返还连接池
-                //redisClient.returnResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
             return true;
         }
@@ -78,72 +73,53 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
 
     @SuppressWarnings("unchecked")
     @Override
-    public V get(RedisKeyEnum key) {
-        Jedis jedis = null;
-        //转换成json 对象
-        String jKey = JSON.toJSONString(key);
-        V jValue = null;
+    public byte[] get(byte[] key) {
         //key 不能为空
-        if(StringUtils.isEmpty(jKey)){
+        if(StringUtils.isEmpty(key)){
             System.out.println("key 为空！");
             return null;
         }
+        byte[] value = null;
         try {
             jedis = redisClient.getResource();
             //执行查询
-            String value = jedis.get(jKey);
-            if(StringUtils.isEmpty(value)) {
-                return null;
-            }
-            else {
-                jValue = (V)JSON.toJSONString(value);
-            }
+            value = jedis.get(key);
             //返还连接池
-            //redisClient.returnResource(jedis);
-            redisClient.close(jedis);
+            redisClient.returnResource(jedis);
         }catch (JedisException e){
             System.out.println("redis 客户端连接失败！");
             if(null != jedis){
                 //释放jedis 对象
-                //redisClient.brokenResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
         }
-        return jValue;
+        return value;
     }
 
-    /**
-     * 删除redis 库中的数据
-     * */
     @SuppressWarnings("finally")
     @Override
-    public boolean remove(RedisKeyEnum key) {
-        Jedis jedis = null;
-        String jKey = JSON.toJSONString(key);
-
+    public boolean remove(byte[] key) {
         boolean isSucess = true;
-        if(StringUtils.isEmpty(jKey)){
+        if(key.length <= 0){
             System.out.println("key 为空！");
             return false;
         }
         try {
             jedis = redisClient.getResource();
             //执行删除
-            jedis.del(jKey);
+            jedis.del(key);
         }catch (JedisException e){
             System.out.println("客户端连接失败！");
             isSucess = false;
             if(null != jedis){
                 //释放jedis 对象
-                //redisClient.brokenResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
             return false;
         }finally {
             if(isSucess){
                 //返还接连池
-                //redisClient.returnResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
             return true;
         }
@@ -159,36 +135,29 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
      */
     @SuppressWarnings("finally")
     @Override
-    public boolean hset(RedisKeyEnum cacheKey, String key, V value) {
-        Jedis jedis =null;
-        //将key 和value  转换成 json 对象
-        String jKey =JSON.toJSONString(key);
-        String jCacheKey =JSON.toJSONString(cacheKey);
-        String jValue =JSON.toJSONString(value);
+    public boolean hset(byte[] cacheKey, byte[] key, byte[] value) {
         //操作是否成功
         boolean isSucess =true;
-        if(StringUtils.isEmpty(jCacheKey)){
+        if(cacheKey.length <= 0){
             System.out.println("cacheKey 为空");
             return false;
         }
         try {
             jedis =redisClient.getResource();
             //执行插入哈希
-            jedis.hset(jCacheKey, jKey, jValue);
+            jedis.hset(cacheKey, key, value);
         } catch (JedisException e) {
             System.out.println("连接客户端失败！");
             isSucess =false;
             if(null !=jedis){
                 //释放jedis 对象
-                //redisClient.brokenResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
             return false;
         }finally{
             if (isSucess) {
                 //返还连接池
-                //redisClient.returnResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
             return true;
         }
@@ -203,13 +172,9 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
      */
     @SuppressWarnings("unchecked")
     @Override
-    public V hget(RedisKeyEnum cacheKey, String key) {
-        Jedis jedis =null;
-        //将key 和value  转换成 json 对象
-        String jKey =JSON.toJSONString(key);
-        String jCacheKey =JSON.toJSONString(cacheKey);
-        V jValue =null;
-        if(StringUtils.isEmpty(jCacheKey)){
+    public byte[] hget(byte[] cacheKey, byte[] key) {
+        byte[] value = null;
+        if(cacheKey.length <= 0){
             System.out.println("cacheKey 为空！");
             return null;
         }
@@ -217,25 +182,17 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
             //获取客户端对象
             jedis =redisClient.getResource();
             //执行查询
-            String value =  jedis.hget(jCacheKey, jKey);
-            //判断值是否非空
-            if(StringUtils.isEmpty(value)){
-                return null;
-            }else{
-                jValue= (V) JSON.toJSONString(value);
-            }
+            value =  jedis.hget(cacheKey, key);
             //返还连接池
-            //redisClient.returnResource(jedis);
-            redisClient.close(jedis);
+            redisClient.returnResource(jedis);
         } catch (JedisException e) {
             System.out.println("连接客户端失败！");
             if(null !=jedis){
                 //释放jedis 对象
-                //redisClient.brokenResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
         }
-        return jValue;
+        return value;
     }
 
     /**
@@ -244,35 +201,24 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
      * @param cacheKey
      * @return
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public Map<String, V> hget(RedisKeyEnum cacheKey) {
-        String jCacheKey = JSON.toJSONString(cacheKey);
+    public Map<byte[], byte[]> hget(byte[] cacheKey) {
         //非空校验
-        if(StringUtils.isEmpty(jCacheKey)){
+        if(StringUtils.isEmpty(cacheKey)){
             System.out.println("cacheKey 为空！");
             return null;
         }
-        Jedis jedis =null;
-        Map<String,V> result =null;
+        Map<byte[], byte[]> result =null;
         try {
             jedis =redisClient.getResource();
             //获取列表集合
-            Map<String,String> map = jedis.hgetAll(jCacheKey);
-
-            if(null !=map){
-                for(Map.Entry<String, String> entry : map.entrySet()){
-                    if(result ==null){
-                        result =new HashMap<String, V>();
-                    }
-                    result.put((String) JSON.toJSONString(entry.getKey()), (V)JSON.toJSONString(entry.getValue()));
-                }
-            }
+            result = jedis.hgetAll(cacheKey);
         } catch (JedisException e) {
             System.out.println("客户端连接失败！");
             if(null !=jedis){
                 //释放jedis 对象
-                //redisClient.brokenResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
         }
         return result;
@@ -287,35 +233,29 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
      */
     @SuppressWarnings("finally")
     @Override
-    public boolean lpush(RedisKeyEnum cacheKey, V value) {
-        Jedis jedis =null;
-        //将key 和value  转换成 json 对象
-        String jCacheKey =JSON.toJSONString(cacheKey);
-        String jValue =JSON.toJSONString(value);
+    public boolean lpush(byte[] cacheKey, byte[] value) {
         //操作是否成功
         boolean isSucess =true;
-        if(StringUtils.isEmpty(jCacheKey)){
+        if(cacheKey.length <= 0){
             System.out.println("cacheKey 为空");
             return false;
         }
         try {
             jedis =redisClient.getResource();
             //执行插入列表
-            jedis.lpush(jCacheKey, jValue);
+            jedis.lpush(cacheKey, value);
         } catch (JedisException e) {
             System.out.println("连接客户端失败！");
             isSucess =false;
             if(null !=jedis){
                 //释放jedis 对象
-                //redisClient.brokenResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
             return false;
         }finally{
             if (isSucess) {
                 //返还连接池
-                //redisClient.returnResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
             return true;
         }
@@ -327,14 +267,11 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
      * @param cacheKey
      * @return
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("finally")
     @Override
-    public Long llen(RedisKeyEnum cacheKey) {
-        Jedis jedis =null;
-        //将key 和value  转换成 json 对象
-        String jCacheKey =JSON.toJSONString(cacheKey);
+    public Long llen(byte[] cacheKey) {
         Long len = null;
-        if(StringUtils.isEmpty(jCacheKey)){
+        if(cacheKey.length <= 0){
             System.out.println("cacheKey 为空！");
             return null;
         }
@@ -342,16 +279,14 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
             //获取客户端对象
             jedis =redisClient.getResource();
             //执行查询
-            len =  jedis.llen(cacheKey.toString());
+            len =  jedis.llen(cacheKey);
             //返还连接池
-            //redisClient.returnResource(jedis);
-            redisClient.close(jedis);
+            redisClient.returnResource(jedis);
         } catch (JedisException e) {
             System.out.println("连接客户端失败！");
             if(null !=jedis){
                 //释放jedis 对象
-                //redisClient.brokenResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
         }
         return len;
@@ -361,15 +296,15 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
      * 获取列表类型的数据
      *
      * @param cacheKey
+     * @param start
+     * @param end
      * @return
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public List<String> lget(RedisKeyEnum cacheKey,int start,int end) {
-        Jedis jedis =null;
-        //将key 和value  转换成 json 对象
-        String jCacheKey =JSON.toJSONString(cacheKey);
-        List<String> result = null;
-        if(StringUtils.isEmpty(jCacheKey)){
+    public List<byte[]> lget(byte[] cacheKey, int start, int end) {
+        List<byte[]> result = null;
+        if(cacheKey.length <= 0){
             System.out.println("cacheKey 为空！");
             return null;
         }
@@ -377,21 +312,17 @@ public class RedisCacheStorageImpl<V> implements RedisCacheStorage<RedisKeyEnum,
             //获取客户端对象
             jedis =redisClient.getResource();
             //执行查询
-            result =  jedis.lrange(cacheKey.toString(),start,end);
-            System.out.println(cacheKey + "lget-result-len:" + result.size());
+            result =  jedis.lrange(cacheKey,start,end);
+//            System.out.println(cacheKey + "lget-result-len:" + result.size());
             //返还连接池
-            //redisClient.returnResource(jedis);
-            redisClient.close(jedis);
+            redisClient.returnResource(jedis);
         } catch (JedisException e) {
             System.out.println("连接客户端失败！");
             if(null !=jedis){
                 //释放jedis 对象
-                //redisClient.brokenResource(jedis);
-                redisClient.close(jedis);
+                redisClient.returnResource(jedis);
             }
         }
         return result;
     }
-
-
 }
